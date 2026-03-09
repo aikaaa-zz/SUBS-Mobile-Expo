@@ -103,13 +103,18 @@ export default function BookingPortalScreen() {
         if (b.status === 'cancelled') return false;
         const sameDate = b.date === dateStr;
         const sameTime = b.time === timeStr;
-        const sameStaff = personnelId ? (b.personnelId === personnelId) : false;
-        return sameDate && sameTime && sameStaff;
+        if (personnelId) {
+          return sameDate && sameTime && b.personnelId === personnelId;
+        } else {
+          return sameDate && sameTime && b.service === service;
+        }
       });
       if (conflict) {
         Alert.alert(
           'Time Slot Unavailable',
-          `${personnelName || 'The selected staff member'} already has a booking at ${timeStr} on ${dateStr}. Please choose a different time or staff member.`
+          personnelId
+            ? `${personnelName || 'The selected staff member'} already has a booking at ${timeStr} on ${dateStr}. Please choose a different time or staff member.`
+            : `${service} is already booked at ${timeStr} on ${dateStr}. Please choose a different time.`
         );
         return false;
       }
@@ -234,7 +239,7 @@ export default function BookingPortalScreen() {
           websiteId: website._id, businessId: website.businessId,
           customerId: session!.userId, businessName: website.name,
           category: website.templateCategory, ...formData,
-          status: 'confirmed', paymentStatus: 'not_required',
+          status: 'pending', paymentStatus: 'not_required',
         };
         const response = await bookingAPI.createBooking(bookingData);
         if (response) {

@@ -85,10 +85,10 @@ const authFetch = async (endpoint: string, options: RequestInit = {}) => {
     return body;
   } catch (error: any) {
     if (error.message === 'Failed to fetch' || error.message === 'Network request failed' || error.name === 'TypeError') {
-      console.error(`API Connection Error [${endpoint}]:`, error);
+      console.warn(`API Connection Error [${endpoint}]:`, error);
       throw new Error('Unable to connect to the server. Please make sure the backend is running.');
     }
-    console.error(`API Error [${endpoint}]:`, error);
+    console.warn(`API Error [${endpoint}]:`, error);
     throw error;
   }
 };
@@ -323,6 +323,16 @@ export const feedbackAPI = {
   },
 };
 
+// MFA API
+export const mfaAPI = {
+  verify: async (email: string, token: string, isBackupCode = false) => {
+    return await authFetch('/mfa/verify', {
+      method: 'POST',
+      body: JSON.stringify({ email, token, isBackupCode }),
+    });
+  },
+};
+
 export default {
   userAPI,
   websiteAPI,
@@ -332,4 +342,5 @@ export default {
   otpAPI,
   notificationAPI,
   feedbackAPI,
+  mfaAPI,
 };

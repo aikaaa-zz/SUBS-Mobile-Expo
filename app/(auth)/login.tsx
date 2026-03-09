@@ -37,6 +37,12 @@ export default function LoginScreen() {
     try {
       const response = await userAPI.login({ email, password });
 
+      if (response.requiresMFA) {
+        router.push({ pathname: '/(auth)/mfa-verify', params: { email } });
+        setLoading(false);
+        return;
+      }
+
       if (response.token && response.user) {
         if (response.user.accountType !== 'personal') {
           setError('This mobile app is for personal accounts only. Please use the web version for business accounts.');
