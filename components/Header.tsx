@@ -58,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ title, showBack = false, onMenuClick, o
       ) : (
         <View style={styles.logoContainer}>
           <Image
-            source={require('../assets/images/subs-icon.png')}
+            source={require('../assets/images/subsicon.png')}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     fontSize: FontSize.xl,
-    fontWeight: FontWeight.semibold,
+    fontFamily: 'Inter_600SemiBold',
     color: Colors.textDark,
     textAlign: 'center',
     marginHorizontal: 8,
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: Colors.white,
     fontSize: 10,
-    fontWeight: FontWeight.bold,
+    fontFamily: 'Inter_700Bold',
   },
 });
 

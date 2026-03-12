@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Image, Modal, Alert,
+  KeyboardAvoidingView, Platform, ActivityIndicator, Image, Modal,
 } from 'react-native';
 import { useRouter, Link } from 'expo-router';
-import { Eye, EyeOff, LogIn, Mail } from 'lucide-react-native';
+import { Eye, EyeOff } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { userAPI } from '../../services/api';
 import { useAuth } from '../../hooks/useAuth';
-import { Colors, FontSize, FontWeight, BorderRadius, Shadows, Spacing } from '../../constants/theme';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -33,17 +33,14 @@ export default function LoginScreen() {
     }
     setError('');
     setLoading(true);
-
     try {
       const response = await userAPI.login({ email, password });
-
       if (response.token && response.user) {
         if (response.user.accountType !== 'personal') {
           setError('This mobile app is for personal accounts only. Please use the web version for business accounts.');
           setLoading(false);
           return;
         }
-
         const success = await login(response.user, response.token);
         if (success) {
           router.replace('/(tabs)/home');
@@ -64,7 +61,6 @@ export default function LoginScreen() {
     if (!forgotPasswordEmail) return;
     setForgotPasswordLoading(true);
     setForgotPasswordMessage('');
-
     try {
       await userAPI.forgotPassword({ email: forgotPasswordEmail });
       setForgotPasswordMessage('Password reset link sent to your email!');
@@ -81,50 +77,66 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView
-        contentContainerStyle={[styles.container, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 20 }]}
-        keyboardShouldPersistTaps="handled"
+    <View style={styles.screen}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.card}>
-          <View style={styles.headerSection}>
-            <Image
-              source={require('../../assets/images/subs-icon.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-            <Text style={styles.heading}>Welcome Back</Text>
-            <Text style={styles.subheading}>Sign in to your personal account</Text>
-          </View>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+          ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Card with gradient */}
+          <LinearGradient
+            colors={['#C84A00', '#3B1200', '#0D0500']}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={styles.card}
+          >
+            {/* Brand header */}
+            <View style={styles.brandRow}>
+              <Image
+                source={require('../../assets/images/subsicon.png')}
+                style={styles.brandLogo}
+                resizeMode="contain"
+              />
+              <Text style={styles.brandName}>Subs</Text>
+            </View>
 
-          {error ? <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View> : null}
+            <Text style={styles.heading}>Log in</Text>
+            <Text style={styles.subheading}>Continue to Subs</Text>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Email</Text>
+            {error ? (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            ) : null}
+
+            {/* Email input */}
             <TextInput
               style={styles.input}
               value={email}
               onChangeText={(t) => { setEmail(t); setError(''); }}
-              placeholder="Enter your email"
-              placeholderTextColor={Colors.textMuted}
+              placeholder="Email address"
+              placeholderTextColor="#7a7a7a"
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
             />
-          </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordContainer}>
+            {/* Password input */}
+            <View style={styles.passwordWrapper}>
               <TextInput
                 style={[styles.input, styles.passwordInput]}
                 value={password}
                 onChangeText={(t) => { setPassword(t); setError(''); }}
-                placeholder="Enter your password"
-                placeholderTextColor={Colors.textMuted}
+                placeholder="Password"
+                placeholderTextColor="#7a7a7a"
                 secureTextEntry={!showPassword}
                 autoComplete="password"
               />
@@ -133,255 +145,396 @@ export default function LoginScreen() {
                 onPress={() => setShowPassword(!showPassword)}
               >
                 {showPassword
-                  ? <EyeOff size={20} color={Colors.textMuted} />
-                  : <Eye size={20} color={Colors.textMuted} />}
+                  ? <EyeOff size={18} color="#7a7a7a" />
+                  : <Eye size={18} color="#7a7a7a" />}
               </TouchableOpacity>
             </View>
-          </View>
 
-          <TouchableOpacity onPress={() => setShowForgotPassword(true)}>
-            <Text style={styles.forgotLink}>Forgot Password?</Text>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => setShowForgotPassword(true)}>
+              <Text style={styles.forgotLink}>Forgot Password?</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.submitButton, loading && styles.submitButtonDisabled]}
-            onPress={handleSubmit}
-            disabled={loading}
-            activeOpacity={0.8}
-          >
-            {loading ? (
-              <ActivityIndicator color={Colors.white} />
-            ) : (
-              <View style={styles.buttonContent}>
-                <LogIn size={20} color={Colors.white} />
-                <Text style={styles.submitButtonText}>Sign In</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+            {/* Continue with email button */}
+            <TouchableOpacity
+              style={[styles.emailButton, loading && { opacity: 0.7 }]}
+              onPress={handleSubmit}
+              disabled={loading}
+              activeOpacity={0.85}
+            >
+              {loading
+                ? <ActivityIndicator color="#fff" />
+                : <Text style={styles.emailButtonText}>CONTINUE WITH EMAIL</Text>}
+            </TouchableOpacity>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
-            <Link href="/(auth)/register" asChild>
-              <TouchableOpacity>
-                <Text style={styles.footerLink}>Sign Up</Text>
+            {/* Passkey button */}
+            <TouchableOpacity style={styles.passkeyButton} activeOpacity={0.8}>
+              <Text style={styles.passkeyIcon}>🔑</Text>
+              <Text style={styles.passkeyText}>SIGN WITH PASSKEY</Text>
+            </TouchableOpacity>
+
+            {/* Divider */}
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            {/* Social login buttons */}
+            <View style={styles.socialRow}>
+              <TouchableOpacity style={styles.socialButton} activeOpacity={0.8}>
+                <Text style={styles.socialApple}></Text>
               </TouchableOpacity>
-            </Link>
-          </View>
-        </View>
+              <TouchableOpacity style={styles.socialButton} activeOpacity={0.8}>
+                <Text style={styles.socialFacebook}>f</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.socialButton} activeOpacity={0.8}>
+                <Text style={styles.socialGoogle}>G</Text>
+              </TouchableOpacity>
+            </View>
 
-        {/* Forgot Password Modal */}
-        <Modal visible={showForgotPassword} transparent animationType="fade">
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Reset Password</Text>
-                <TouchableOpacity onPress={() => setShowForgotPassword(false)}>
-                  <Text style={styles.closeButton}>×</Text>
+            {/* Footer */}
+            <View style={styles.footerRow}>
+              <Text style={styles.footerText}>New to SUBS? </Text>
+              <Link href="/(auth)/register" asChild>
+                <TouchableOpacity>
+                  <Text style={styles.footerLink}>Get Started →</Text>
                 </TouchableOpacity>
-              </View>
-              <Text style={styles.modalDescription}>
-                Enter your email address and we'll send you a link to reset your password.
-              </Text>
-              <View style={styles.formGroup}>
-                <View style={styles.labelRow}>
-                  <Mail size={18} color={Colors.textMuted} />
-                  <Text style={styles.label}> Email Address</Text>
-                </View>
-                <TextInput
-                  style={styles.input}
-                  value={forgotPasswordEmail}
-                  onChangeText={setForgotPasswordEmail}
-                  placeholder="Enter your email"
-                  placeholderTextColor={Colors.textMuted}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </View>
-              {forgotPasswordMessage ? (
-                <View style={[styles.errorBox, forgotPasswordMessage.includes('sent') && styles.successBox]}>
-                  <Text style={[styles.errorText, forgotPasswordMessage.includes('sent') && styles.successText]}>
-                    {forgotPasswordMessage}
-                  </Text>
-                </View>
-              ) : null}
-              <TouchableOpacity
-                style={[styles.submitButton, forgotPasswordLoading && styles.submitButtonDisabled]}
-                onPress={handleForgotPassword}
-                disabled={forgotPasswordLoading}
-              >
-                {forgotPasswordLoading ? (
-                  <ActivityIndicator color={Colors.white} />
-                ) : (
-                  <Text style={styles.submitButtonText}>Send Reset Link</Text>
-                )}
+              </Link>
+            </View>
+
+            <View style={styles.legalRow}>
+              <TouchableOpacity><Text style={styles.legalLink}>Help</Text></TouchableOpacity>
+              <Text style={styles.legalDot}>  ·  </Text>
+              <TouchableOpacity><Text style={styles.legalLink}>Privacy</Text></TouchableOpacity>
+              <Text style={styles.legalDot}>  ·  </Text>
+              <TouchableOpacity><Text style={styles.legalLink}>Terms</Text></TouchableOpacity>
+            </View>
+          </LinearGradient>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* Forgot Password Modal */}
+      <Modal visible={showForgotPassword} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <LinearGradient
+            colors={['#C84A00', '#3B1200', '#0D0500']}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={styles.modalCard}
+          >
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Reset Password</Text>
+              <TouchableOpacity onPress={() => setShowForgotPassword(false)}>
+                <Text style={styles.closeButton}>×</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </Modal>
-      </ScrollView>
-    </KeyboardAvoidingView>
+            <Text style={styles.modalDescription}>
+              Enter your email address and we'll send you a link to reset your password.
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={forgotPasswordEmail}
+              onChangeText={setForgotPasswordEmail}
+              placeholder="Enter your email"
+              placeholderTextColor="#7a7a7a"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            {forgotPasswordMessage ? (
+              <View style={[styles.errorBox, forgotPasswordMessage.includes('sent') && styles.successBox]}>
+                <Text style={[styles.errorText, forgotPasswordMessage.includes('sent') && styles.successText]}>
+                  {forgotPasswordMessage}
+                </Text>
+              </View>
+            ) : null}
+            <TouchableOpacity
+              style={[styles.emailButton, forgotPasswordLoading && { opacity: 0.7 }]}
+              onPress={handleForgotPassword}
+              disabled={forgotPasswordLoading}
+            >
+              {forgotPasswordLoading
+                ? <ActivityIndicator color="#fff" />
+                : <Text style={styles.emailButtonText}>SEND RESET LINK</Text>}
+            </TouchableOpacity>
+          </LinearGradient>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: Colors.bgLight },
-  container: {
+  screen: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  flex: { flex: 1 },
+  scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
+
+  // Card
   card: {
-    backgroundColor: Colors.bgWhite,
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.xxl,
-    ...Shadows.lg,
+    borderRadius: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+    overflow: 'hidden',
   },
-  headerSection: {
+
+  // Brand
+  brandRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.xxl,
+    justifyContent: 'center',
+    marginBottom: 16,
   },
-  logo: {
-    width: 80,
-    height: 80,
-    borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.lg,
+  brandLogo: {
+    width: 32,
+    height: 32,
+    marginRight: 8,
   },
+  brandName: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.5,
+  },
+
+  // Headings
   heading: {
-    fontSize: FontSize.xxxl,
-    fontWeight: FontWeight.bold,
-    color: Colors.textDark,
-    marginBottom: Spacing.xs,
+    color: '#ffffff',
+    fontSize: 28,
+    fontFamily: 'Inter_700Bold',
+    textAlign: 'center',
+    marginBottom: 6,
   },
   subheading: {
-    fontSize: FontSize.lg,
-    color: Colors.textMuted,
+    color: '#a0a0a0',
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
+    marginBottom: 24,
   },
+
+  // Error
   errorBox: {
-    backgroundColor: Colors.errorBg,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    marginBottom: Spacing.lg,
+    backgroundColor: 'rgba(239,68,68,0.15)',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
   },
   errorText: {
-    color: Colors.errorRed,
-    fontSize: FontSize.md,
+    color: '#f87171',
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
     textAlign: 'center',
   },
   successBox: {
-    backgroundColor: Colors.successBg,
+    backgroundColor: 'rgba(16,185,129,0.15)',
   },
   successText: {
-    color: Colors.successGreen,
+    color: '#34d399',
+    fontFamily: 'Inter_400Regular',
   },
-  formGroup: {
-    marginBottom: Spacing.lg,
-  },
-  label: {
-    fontSize: FontSize.md,
-    fontWeight: FontWeight.medium,
-    color: Colors.textDark,
-    marginBottom: Spacing.sm,
-  },
-  labelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
+
+  // Inputs
   input: {
-    backgroundColor: Colors.bgLight,
+    backgroundColor: 'rgba(0,0,0,0.45)',
     borderWidth: 1,
-    borderColor: Colors.borderColor,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    fontSize: FontSize.lg,
-    color: Colors.textDark,
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
+    fontSize: 15,
+    fontFamily: 'Inter_400Regular',
+    color: '#ffffff',
+    marginBottom: 12,
   },
-  passwordContainer: {
+  passwordWrapper: {
     position: 'relative',
   },
   passwordInput: {
-    paddingRight: 50,
+    paddingRight: 48,
   },
   eyeButton: {
     position: 'absolute',
     right: 14,
     top: 0,
-    bottom: 0,
+    bottom: 12,
     justifyContent: 'center',
   },
+
+  // Forgot
   forgotLink: {
-    color: Colors.primaryOrange,
-    fontSize: FontSize.md,
-    fontWeight: FontWeight.medium,
+    color: '#ff6600',
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
     textAlign: 'right',
-    marginBottom: Spacing.xl,
+    marginBottom: 20,
   },
-  submitButton: {
-    backgroundColor: Colors.primaryOrange,
-    borderRadius: BorderRadius.md,
+
+  // Email button
+  emailButton: {
+    backgroundColor: '#ff6600',
+    borderRadius: 10,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginBottom: 12,
+    shadowColor: '#ff4400',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  emailButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1,
+  },
+
+  // Passkey button
+  passkeyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 10,
+    paddingVertical: 14,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  passkeyIcon: {
+    fontSize: 16,
+    marginRight: 8,
+  },
+  passkeyText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    letterSpacing: 0.8,
+  },
+
+  // Divider
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+  },
+  dividerText: {
+    color: '#7a7a7a',
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    paddingHorizontal: 12,
+  },
+
+  // Social
+  socialRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 24,
+  },
+  socialButton: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.xl,
   },
-  submitButtonDisabled: {
-    opacity: 0.7,
+  socialApple: {
+    fontSize: 20,
+    color: '#000000',
+    lineHeight: 22,
   },
-  submitButtonText: {
-    color: Colors.white,
-    fontSize: FontSize.lg,
-    fontWeight: FontWeight.semibold,
-    marginLeft: Spacing.sm,
+  socialFacebook: {
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
+    color: '#1877F2',
+    lineHeight: 22,
   },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  socialGoogle: {
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
+    color: '#EA4335',
+    lineHeight: 22,
   },
-  footer: {
+
+  // Footer
+  footerRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 12,
   },
   footerText: {
-    fontSize: FontSize.md,
-    color: Colors.textMuted,
+    color: '#a0a0a0',
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
   },
   footerLink: {
-    fontSize: FontSize.md,
-    color: Colors.primaryOrange,
-    fontWeight: FontWeight.semibold,
+    color: '#ff6600',
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
   },
+  legalRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  legalLink: {
+    color: '#666',
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+  },
+  legalDot: {
+    color: '#444',
+    fontSize: 12,
+  },
+
+  // Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
     justifyContent: 'center',
-    padding: 20,
+    padding: 24,
   },
-  modalContent: {
-    backgroundColor: Colors.bgWhite,
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.xxl,
+  modalCard: {
+    borderRadius: 24,
+    padding: 24,
+    overflow: 'hidden',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.lg,
+    marginBottom: 12,
   },
   modalTitle: {
-    fontSize: FontSize.xxl,
-    fontWeight: FontWeight.bold,
-    color: Colors.textDark,
+    color: '#ffffff',
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
   },
   closeButton: {
+    color: '#a0a0a0',
     fontSize: 28,
-    color: Colors.textMuted,
     lineHeight: 28,
   },
   modalDescription: {
-    fontSize: FontSize.md,
-    color: Colors.textMuted,
-    marginBottom: Spacing.lg,
+    color: '#a0a0a0',
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    marginBottom: 16,
+    lineHeight: 20,
   },
 });

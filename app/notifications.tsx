@@ -114,21 +114,14 @@ export default function NotificationsScreen() {
     <View style={styles.page}>
       <Header title="Notifications" showBack onRefresh={loadNotifications} />
 
-      <View style={styles.headerSection}>
-        <View style={styles.headerTitle}>
-          <Bell size={28} color={Colors.textDark} />
-          <View>
-            <Text style={styles.pageTitle}>Notifications</Text>
-            {unreadCount > 0 && <Text style={styles.unreadBadge}>{unreadCount} unread</Text>}
-          </View>
-        </View>
-        {unreadCount > 0 && (
+      {unreadCount > 0 && (
+        <View style={styles.markAllRow}>
           <TouchableOpacity style={styles.markAllBtn} onPress={handleMarkAllAsRead}>
             <CheckCheck size={18} color={Colors.primaryOrange} />
             <Text style={styles.markAllText}>Mark all read</Text>
           </TouchableOpacity>
-        )}
-      </View>
+        </View>
+      )}
 
       <View style={styles.filterTabs}>
         <TouchableOpacity style={[styles.filterTab, filter === 'all' && styles.filterTabActive]} onPress={() => setFilter('all')}>
@@ -163,16 +156,13 @@ export default function NotificationsScreen() {
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: Colors.bgLight },
-  headerSection: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 12 },
-  headerTitle: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  pageTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.textDark },
-  unreadBadge: { fontSize: FontSize.sm, color: Colors.primaryOrange, fontWeight: FontWeight.semibold },
+  markAllRow: { paddingHorizontal: 20, paddingTop: 8, alignItems: 'flex-end' },
   markAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  markAllText: { fontSize: FontSize.sm, color: Colors.primaryOrange, fontWeight: FontWeight.medium },
+  markAllText: { fontSize: FontSize.sm, color: Colors.primaryOrange, fontFamily: 'Inter_500Medium' },
   filterTabs: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 12, gap: 8 },
   filterTab: { paddingHorizontal: 20, paddingVertical: 8, borderRadius: BorderRadius.full, backgroundColor: Colors.bgWhite, borderWidth: 1, borderColor: Colors.borderColor },
   filterTabActive: { backgroundColor: Colors.primaryOrange, borderColor: Colors.primaryOrange },
-  filterTabText: { fontSize: FontSize.md, color: Colors.textMuted, fontWeight: FontWeight.medium },
+  filterTabText: { fontSize: FontSize.md, color: Colors.textMuted, fontFamily: 'Inter_500Medium' },
   filterTabTextActive: { color: Colors.white },
   listContent: { paddingHorizontal: 20, paddingBottom: 20 },
   notifItem: { flexDirection: 'row', backgroundColor: Colors.bgWhite, borderRadius: BorderRadius.lg, padding: 14, marginBottom: 8, ...Shadows.sm },
@@ -180,11 +170,11 @@ const styles = StyleSheet.create({
   notifIcon: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
   notifContent: { flex: 1 },
   notifHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  notifTitle: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, color: Colors.textDark, flex: 1, marginRight: 8 },
-  notifTime: { fontSize: FontSize.xs, color: Colors.textMuted },
-  notifMessage: { fontSize: FontSize.md, color: Colors.textMuted, marginBottom: 8, lineHeight: 20 },
+  notifTitle: { fontSize: FontSize.md, fontFamily: 'Inter_600SemiBold', color: Colors.textDark, flex: 1, marginRight: 8 },
+  notifTime: { fontSize: FontSize.xs, fontFamily: 'Inter_400Regular', color: Colors.textMuted },
+  notifMessage: { fontSize: FontSize.md, fontFamily: 'Inter_400Regular', color: Colors.textMuted, marginBottom: 8, lineHeight: 20 },
   notifActions: { flexDirection: 'row', gap: 16 },
   actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  actionBtnText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
+  actionBtnText: { fontSize: FontSize.sm, fontFamily: 'Inter_500Medium' },
   unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primaryOrange, marginLeft: 4, marginTop: 4 },
 });

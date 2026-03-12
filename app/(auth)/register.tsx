@@ -4,10 +4,10 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator, Image,
 } from 'react-native';
 import { useRouter, Link } from 'expo-router';
-import { Eye, EyeOff, UserPlus } from 'lucide-react-native';
+import { Eye, EyeOff } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { userAPI } from '../../services/api';
-import { Colors, FontSize, FontWeight, BorderRadius, Shadows, Spacing } from '../../constants/theme';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -37,13 +37,11 @@ export default function RegisterScreen() {
       setError('Passwords do not match');
       return;
     }
-
     setLoading(true);
     try {
       const response = await userAPI.register({
         email, firstName, lastName, password, accountType: 'personal',
       });
-
       if (response.message || response.user) {
         router.replace('/(auth)/login');
       }
@@ -55,206 +53,245 @@ export default function RegisterScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView
-        contentContainerStyle={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}
-        keyboardShouldPersistTaps="handled"
+    <View style={styles.screen}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.card}>
-          <View style={styles.headerSection}>
-            <Image
-              source={require('../../assets/images/subs-icon.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+          ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <LinearGradient
+            colors={['#C84A00', '#3B1200', '#0D0500']}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={styles.card}
+          >
+            {/* Brand header */}
+            <View style={styles.brandRow}>
+              <Image
+                source={require('../../assets/images/subsicon.png')}
+                style={styles.brandLogo}
+                resizeMode="contain"
+              />
+              <Text style={styles.brandName}>Subs</Text>
+            </View>
+
             <Text style={styles.heading}>Create Account</Text>
-            <Text style={styles.subheading}>Sign up for a personal account</Text>
-          </View>
+            <Text style={styles.subheading}>Join Subs today</Text>
 
-          {error ? <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View> : null}
+            {error ? (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            ) : null}
 
-          <View style={styles.row}>
-            <View style={[styles.formGroup, styles.halfInput]}>
-              <Text style={styles.label}>First Name</Text>
+            {/* First & Last name row */}
+            <View style={styles.nameRow}>
               <TextInput
-                style={styles.input}
+                style={[styles.input, styles.halfInput]}
                 value={firstName}
                 onChangeText={(t) => { setFirstName(t); setError(''); }}
                 placeholder="First name"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor="#7a7a7a"
                 autoComplete="given-name"
               />
-            </View>
-            <View style={[styles.formGroup, styles.halfInput]}>
-              <Text style={styles.label}>Last Name</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, styles.halfInput]}
                 value={lastName}
                 onChangeText={(t) => { setLastName(t); setError(''); }}
                 placeholder="Last name"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor="#7a7a7a"
                 autoComplete="family-name"
               />
             </View>
-          </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Email</Text>
+            {/* Email */}
             <TextInput
               style={styles.input}
               value={email}
               onChangeText={(t) => { setEmail(t); setError(''); }}
-              placeholder="Enter your email"
-              placeholderTextColor={Colors.textMuted}
+              placeholder="Email address"
+              placeholderTextColor="#7a7a7a"
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
             />
-          </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordContainer}>
+            {/* Password */}
+            <View style={styles.passwordWrapper}>
               <TextInput
                 style={[styles.input, styles.passwordInput]}
                 value={password}
                 onChangeText={(t) => { setPassword(t); setError(''); }}
-                placeholder="Create a password"
-                placeholderTextColor={Colors.textMuted}
+                placeholder="Password"
+                placeholderTextColor="#7a7a7a"
                 secureTextEntry={!showPassword}
               />
-              <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword(!showPassword)}>
-                {showPassword ? <EyeOff size={20} color={Colors.textMuted} /> : <Eye size={20} color={Colors.textMuted} />}
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                {showPassword
+                  ? <EyeOff size={18} color="#7a7a7a" />
+                  : <Eye size={18} color="#7a7a7a" />}
               </TouchableOpacity>
             </View>
             <Text style={styles.hint}>Minimum 6 characters</Text>
-          </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Confirm Password</Text>
-            <View style={styles.passwordContainer}>
+            {/* Confirm Password */}
+            <View style={[styles.passwordWrapper, { marginTop: 12 }]}>
               <TextInput
                 style={[styles.input, styles.passwordInput]}
                 value={confirmPassword}
                 onChangeText={(t) => { setConfirmPassword(t); setError(''); }}
-                placeholder="Confirm your password"
-                placeholderTextColor={Colors.textMuted}
+                placeholder="Confirm password"
+                placeholderTextColor="#7a7a7a"
                 secureTextEntry={!showConfirmPassword}
               />
-              <TouchableOpacity style={styles.eyeButton} onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                {showConfirmPassword ? <EyeOff size={20} color={Colors.textMuted} /> : <Eye size={20} color={Colors.textMuted} />}
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword
+                  ? <EyeOff size={18} color="#7a7a7a" />
+                  : <Eye size={18} color="#7a7a7a" />}
               </TouchableOpacity>
             </View>
-          </View>
 
-          <TouchableOpacity
-            style={[styles.submitButton, loading && styles.submitButtonDisabled]}
-            onPress={handleSubmit}
-            disabled={loading}
-            activeOpacity={0.8}
-          >
-            {loading ? (
-              <ActivityIndicator color={Colors.white} />
-            ) : (
-              <View style={styles.buttonContent}>
-                <UserPlus size={20} color={Colors.white} />
-                <Text style={styles.submitButtonText}>Create Account</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+            {/* Submit */}
+            <TouchableOpacity
+              style={[styles.submitButton, loading && { opacity: 0.7 }]}
+              onPress={handleSubmit}
+              disabled={loading}
+              activeOpacity={0.85}
+            >
+              {loading
+                ? <ActivityIndicator color="#fff" />
+                : <Text style={styles.submitButtonText}>CREATE ACCOUNT</Text>}
+            </TouchableOpacity>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account? </Text>
-            <Link href="/(auth)/login" asChild>
-              <TouchableOpacity>
-                <Text style={styles.footerLink}>Sign In</Text>
-              </TouchableOpacity>
-            </Link>
-          </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+            {/* Footer */}
+            <View style={styles.footerRow}>
+              <Text style={styles.footerText}>Already have an account? </Text>
+              <Link href="/(auth)/login" asChild>
+                <TouchableOpacity>
+                  <Text style={styles.footerLink}>Sign In →</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
+
+            <View style={styles.legalRow}>
+              <TouchableOpacity><Text style={styles.legalLink}>Help</Text></TouchableOpacity>
+              <Text style={styles.legalDot}>  ·  </Text>
+              <TouchableOpacity><Text style={styles.legalLink}>Privacy</Text></TouchableOpacity>
+              <Text style={styles.legalDot}>  ·  </Text>
+              <TouchableOpacity><Text style={styles.legalLink}>Terms</Text></TouchableOpacity>
+            </View>
+          </LinearGradient>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: Colors.bgLight },
-  container: {
+  screen: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  flex: { flex: 1 },
+  scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
+
   card: {
-    backgroundColor: Colors.bgWhite,
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.xxl,
-    ...Shadows.lg,
+    borderRadius: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+    overflow: 'hidden',
   },
-  headerSection: {
+
+  brandRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.xxl,
+    justifyContent: 'center',
+    marginBottom: 16,
   },
-  logo: {
-    width: 80,
-    height: 80,
-    borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.lg,
+  brandLogo: {
+    width: 32,
+    height: 32,
+    marginRight: 8,
   },
+  brandName: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.5,
+  },
+
   heading: {
-    fontSize: FontSize.xxxl,
-    fontWeight: FontWeight.bold,
-    color: Colors.textDark,
-    marginBottom: Spacing.xs,
+    color: '#ffffff',
+    fontSize: 28,
+    fontFamily: 'Inter_700Bold',
+    textAlign: 'center',
+    marginBottom: 6,
   },
   subheading: {
-    fontSize: FontSize.lg,
-    color: Colors.textMuted,
+    color: '#a0a0a0',
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
+    marginBottom: 24,
   },
+
   errorBox: {
-    backgroundColor: Colors.errorBg,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    marginBottom: Spacing.lg,
+    backgroundColor: 'rgba(239,68,68,0.15)',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
   },
   errorText: {
-    color: Colors.errorRed,
-    fontSize: FontSize.md,
+    color: '#f87171',
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
     textAlign: 'center',
   },
-  row: {
+
+  nameRow: {
     flexDirection: 'row',
-    gap: Spacing.md,
+    gap: 10,
   },
   halfInput: {
     flex: 1,
   },
-  formGroup: {
-    marginBottom: Spacing.lg,
-  },
-  label: {
-    fontSize: FontSize.md,
-    fontWeight: FontWeight.medium,
-    color: Colors.textDark,
-    marginBottom: Spacing.sm,
-  },
+
   input: {
-    backgroundColor: Colors.bgLight,
+    backgroundColor: 'rgba(0,0,0,0.45)',
     borderWidth: 1,
-    borderColor: Colors.borderColor,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    fontSize: FontSize.lg,
-    color: Colors.textDark,
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
+    fontSize: 15,
+    fontFamily: 'Inter_400Regular',
+    color: '#ffffff',
+    marginBottom: 12,
   },
-  passwordContainer: {
+  passwordWrapper: {
     position: 'relative',
   },
   passwordInput: {
-    paddingRight: 50,
+    paddingRight: 48,
+    marginBottom: 0,
   },
   eyeButton: {
     position: 'absolute',
@@ -264,43 +301,62 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   hint: {
-    fontSize: FontSize.sm,
-    color: Colors.textMuted,
+    color: '#7a7a7a',
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
     marginTop: 4,
+    marginBottom: 0,
+    paddingLeft: 2,
   },
+
   submitButton: {
-    backgroundColor: Colors.primaryOrange,
-    borderRadius: BorderRadius.md,
-    paddingVertical: 14,
+    backgroundColor: '#ff6600',
+    borderRadius: 10,
+    paddingVertical: 15,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.xl,
-  },
-  submitButtonDisabled: {
-    opacity: 0.7,
+    marginTop: 20,
+    marginBottom: 20,
+    shadowColor: '#ff4400',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 5,
   },
   submitButtonText: {
-    color: Colors.white,
-    fontSize: FontSize.lg,
-    fontWeight: FontWeight.semibold,
-    marginLeft: Spacing.sm,
+    color: '#ffffff',
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1,
   },
-  buttonContent: {
+
+  footerRow: {
     flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 12,
   },
-  footer: {
+  footerText: {
+    color: '#a0a0a0',
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+  },
+  footerLink: {
+    color: '#ff6600',
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  legalRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  footerText: {
-    fontSize: FontSize.md,
-    color: Colors.textMuted,
+  legalLink: {
+    color: '#666',
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
   },
-  footerLink: {
-    fontSize: FontSize.md,
-    color: Colors.primaryOrange,
-    fontWeight: FontWeight.semibold,
+  legalDot: {
+    color: '#444',
+    fontSize: 12,
   },
 });

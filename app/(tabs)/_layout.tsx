@@ -1,7 +1,7 @@
 import { Tabs, Redirect } from 'expo-router';
 import { Home, Search, Calendar, Heart, User } from 'lucide-react-native';
 import { useAuth } from '../../hooks/useAuth';
-import { Colors, FontSize, FontWeight } from '../../constants/theme';
+import { Colors, FontSize, FontWeight, FontFamily } from '../../constants/theme';
 import { ActivityIndicator, View } from 'react-native';
 
 export default function TabsLayout() {
@@ -16,7 +16,7 @@ export default function TabsLayout() {
   }
 
   if (!isAuthenticated) {
-    return <Redirect href="/(auth)/login" />;
+    return <Redirect href="/welcome" />;
   }
 
   return (
@@ -35,7 +35,7 @@ export default function TabsLayout() {
         },
         tabBarLabelStyle: {
           fontSize: FontSize.xs,
-          fontWeight: FontWeight.medium,
+          fontFamily: FontFamily.medium,
         },
       }}
     >

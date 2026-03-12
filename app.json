@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "scheme": "subs-mobile",
     "splash": {
-      "backgroundColor": "#ff6600"
+      "backgroundColor": "#D94F0A"
     },
     "ios": {
       "supportsTablet": true,

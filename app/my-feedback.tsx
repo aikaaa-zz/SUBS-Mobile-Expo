@@ -142,11 +142,6 @@ export default function MyFeedbackScreen() {
     <View style={styles.page}>
       <Header title="My Feedback" showBack onRefresh={loadFeedback} />
 
-      <View style={styles.pageHeader}>
-        <MessageSquare size={28} color={Colors.textDark} />
-        <Text style={styles.pageTitle}>My Feedback</Text>
-      </View>
-
       {loading ? <LoadingSpinner /> : (
         <FlatList
           data={feedbacks}
@@ -169,34 +164,32 @@ export default function MyFeedbackScreen() {
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: Colors.bgLight },
-  pageHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
-  pageTitle: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.textDark },
   listContent: { paddingHorizontal: 20, paddingBottom: 20 },
   card: { backgroundColor: Colors.bgWhite, borderRadius: BorderRadius.lg, padding: 16, marginBottom: 12, ...Shadows.sm },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  businessName: { fontSize: FontSize.lg, fontWeight: FontWeight.semibold, color: Colors.textDark },
+  businessName: { fontSize: FontSize.lg, fontFamily: 'Inter_600SemiBold', color: Colors.textDark },
   dateRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  dateText: { fontSize: FontSize.sm, color: Colors.textMuted },
+  dateText: { fontSize: FontSize.sm, fontFamily: 'Inter_400Regular', color: Colors.textMuted },
   ratingBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#fef3c7', paddingHorizontal: 10, paddingVertical: 4, borderRadius: BorderRadius.full },
-  ratingValue: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: '#92400e' },
+  ratingValue: { fontSize: FontSize.lg, fontFamily: 'Inter_700Bold', color: '#92400e' },
   ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  ratingText: { fontSize: FontSize.md, color: Colors.textMuted, fontWeight: FontWeight.medium },
+  ratingText: { fontSize: FontSize.md, fontFamily: 'Inter_500Medium', color: Colors.textMuted },
   commentBox: { backgroundColor: Colors.bgLight, borderRadius: BorderRadius.md, padding: 12, marginBottom: 10 },
-  commentText: { fontSize: FontSize.md, color: Colors.textDark, lineHeight: 22 },
+  commentText: { fontSize: FontSize.md, fontFamily: 'Inter_400Regular', color: Colors.textDark, lineHeight: 22 },
   detailedRatings: { borderTopWidth: 1, borderTopColor: Colors.borderColor, paddingTop: 10, marginBottom: 10 },
-  detailedTitle: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, color: Colors.textDark, marginBottom: 8 },
+  detailedTitle: { fontSize: FontSize.md, fontFamily: 'Inter_600SemiBold', color: Colors.textDark, marginBottom: 8 },
   ratingItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  ratingItemLabel: { fontSize: FontSize.md, color: Colors.textMuted },
+  ratingItemLabel: { fontSize: FontSize.md, fontFamily: 'Inter_400Regular', color: Colors.textMuted },
   ratingItemValue: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  ratingItemNum: { fontSize: FontSize.sm, color: Colors.textMuted },
+  ratingItemNum: { fontSize: FontSize.sm, fontFamily: 'Inter_400Regular', color: Colors.textMuted },
   recommendBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: BorderRadius.full, alignSelf: 'flex-start', marginBottom: 10 },
   recommendYes: { backgroundColor: Colors.successBg },
   recommendNo: { backgroundColor: Colors.errorBg },
-  recommendText: { fontSize: FontSize.sm, fontWeight: FontWeight.medium },
+  recommendText: { fontSize: FontSize.sm, fontFamily: 'Inter_500Medium' },
   responseBox: { backgroundColor: '#f0f9ff', borderRadius: BorderRadius.md, padding: 12, borderLeftWidth: 3, borderLeftColor: '#3b82f6', marginBottom: 8 },
-  responseTitle: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, color: '#1e40af', marginBottom: 4 },
-  responseText: { fontSize: FontSize.md, color: Colors.textDark, lineHeight: 22 },
-  responseDate: { fontSize: FontSize.sm, color: Colors.textMuted, marginTop: 6 },
+  responseTitle: { fontSize: FontSize.md, fontFamily: 'Inter_600SemiBold', color: '#1e40af', marginBottom: 4 },
+  responseText: { fontSize: FontSize.md, fontFamily: 'Inter_400Regular', color: Colors.textDark, lineHeight: 22 },
+  responseDate: { fontSize: FontSize.sm, fontFamily: 'Inter_400Regular', color: Colors.textMuted, marginTop: 6 },
   anonymousBadge: { alignSelf: 'flex-start', backgroundColor: Colors.bgLight, paddingHorizontal: 12, paddingVertical: 4, borderRadius: BorderRadius.full },
-  anonymousText: { fontSize: FontSize.sm, color: Colors.textMuted, fontWeight: FontWeight.medium },
+  anonymousText: { fontSize: FontSize.sm, fontFamily: 'Inter_500Medium', color: Colors.textMuted },
 });

@@ -77,14 +77,14 @@ const styles = StyleSheet.create({
   listContent: { padding: 20 },
   card: { backgroundColor: Colors.bgWhite, borderRadius: BorderRadius.lg, marginBottom: 12, ...Shadows.sm },
   cardContent: { flexDirection: 'row', padding: 16 },
-  name: { fontSize: FontSize.xl, fontWeight: FontWeight.semibold, color: Colors.textDark, marginBottom: 4 },
+  name: { fontSize: FontSize.xl, fontFamily: 'Inter_600SemiBold', color: Colors.textDark, marginBottom: 4 },
   categoryTag: { alignSelf: 'flex-start', backgroundColor: Colors.lightOrangeBg, paddingHorizontal: 10, paddingVertical: 2, borderRadius: BorderRadius.full, marginBottom: 6 },
-  categoryText: { fontSize: FontSize.xs, color: Colors.primaryOrange, fontWeight: FontWeight.semibold },
-  desc: { fontSize: FontSize.md, color: Colors.textMuted, lineHeight: 20 },
+  categoryText: { fontSize: FontSize.xs, color: Colors.primaryOrange, fontFamily: 'Inter_600SemiBold' },
+  desc: { fontSize: FontSize.md, fontFamily: 'Inter_400Regular', color: Colors.textMuted, lineHeight: 20 },
   visitIcon: { justifyContent: 'center', marginLeft: 12 },
   removeBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 12, borderTopWidth: 1, borderTopColor: Colors.borderColor,
   },
-  removeBtnText: { fontSize: FontSize.md, color: Colors.errorRed, fontWeight: FontWeight.medium },
+  removeBtnText: { fontSize: FontSize.md, color: Colors.errorRed, fontFamily: 'Inter_500Medium' },
 });

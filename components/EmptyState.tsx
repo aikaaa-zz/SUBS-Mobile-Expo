@@ -40,13 +40,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: FontSize.xl,
-    fontWeight: FontWeight.semibold,
+    fontFamily: 'Inter_600SemiBold',
     color: Colors.textDark,
     marginBottom: 8,
     textAlign: 'center',
   },
   message: {
     fontSize: FontSize.lg,
+    fontFamily: 'Inter_400Regular',
     color: Colors.textMuted,
     textAlign: 'center',
     marginBottom: 16,
@@ -60,7 +61,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: Colors.white,
     fontSize: FontSize.md,
-    fontWeight: FontWeight.semibold,
+    fontFamily: 'Inter_600SemiBold',
   },
 });
 
