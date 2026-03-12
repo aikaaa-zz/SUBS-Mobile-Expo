@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  RefreshControl, StatusBar,
+  RefreshControl, StatusBar, ImageBackground, Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   Bell, Compass, Calendar, Bookmark, Heart,
-  MapPin, Clock, Star, AlertCircle, Globe, Building2, Dumbbell, Sparkles,
+  MapPin, Clock, Star, AlertCircle,
+  Stethoscope, Plane, Building2,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,25 +16,14 @@ import { websiteAPI } from '../../services/api';
 import { storage } from '../../utils/storage';
 import { useAuth } from '../../hooks/useAuth';
 
-const ORANGE = '#ff6600';
+const ORANGE = '#E65100';
+const ORANGE_LIGHT = '#ff6600';
 
 const CATEGORIES = [
-  { key: 'All',      label: 'All',      Icon: Compass    },
-  { key: 'Dental',   label: 'Dental',   Icon: Star       },
-  { key: 'Travel',   label: 'Travel',   Icon: Globe      },
-  { key: 'Hotel',    label: 'Hotels',   Icon: Building2  },
-  { key: 'Fitness',  label: 'Fitness',  Icon: Dumbbell   },
-  { key: 'Beauty',   label: 'Beauty',   Icon: Sparkles   },
+  { key: 'Dental',  label: 'Dental',  Icon: Stethoscope },
+  { key: 'Travel',  label: 'Travel',  Icon: Plane       },
+  { key: 'Hotel',   label: 'Hotels',  Icon: Building2   },
 ];
-
-/* ── Inline S logo ──────────────────────────────────────── */
-function SLogo() {
-  return (
-    <View style={styles.sLogo}>
-      <Text style={styles.sLogoText}>S</Text>
-    </View>
-  );
-}
 
 /* ── Star row ───────────────────────────────────────────── */
 function StarRow({ rating = 4 }: { rating?: number }) {
@@ -42,8 +32,8 @@ function StarRow({ rating = 4 }: { rating?: number }) {
       {[1, 2, 3, 4, 5].map(i => (
         <Star
           key={i} size={13}
-          color={ORANGE}
-          fill={i <= rating ? ORANGE : 'none'}
+          color={ORANGE_LIGHT}
+          fill={i <= rating ? ORANGE_LIGHT : 'none'}
         />
       ))}
       <Text style={styles.ratingNum}>{rating.toFixed(1)}</Text>
@@ -51,58 +41,62 @@ function StarRow({ rating = 4 }: { rating?: number }) {
   );
 }
 
-/* ── Recommended card ───────────────────────────────────── */
+/* ── Featured recommended card ──────────────────────────── */
 function RecCard({ business, onPress }: { business: any; onPress: () => void }) {
   const [fav, setFav] = useState(false);
+  const imageUri = business.businessData?.logo || business.businessData?.coverImage;
+
   return (
-    <TouchableOpacity style={styles.recCard} onPress={onPress} activeOpacity={0.88}>
-      {/* Image placeholder */}
-      <View style={styles.recCardImg}>
+    <TouchableOpacity style={styles.recCard} onPress={onPress} activeOpacity={0.9}>
+      <ImageBackground
+        source={imageUri ? { uri: imageUri } : require('../../assets/images/bg_org.png')}
+        style={styles.recCardImg}
+        imageStyle={{ borderRadius: 18 }}
+        resizeMode="cover"
+      >
+        {/* Dark gradient overlay at bottom */}
         <LinearGradient
-          colors={['#d8d0c8', '#c0b8ae', '#a8a099']}
-          start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+          colors={['transparent', 'rgba(0,0,0,0.75)']}
+          locations={[0.3, 1]}
           style={StyleSheet.absoluteFill}
         />
-        {/* Simulated sofa / furniture */}
-        <View style={styles.sofa} />
-        <View style={styles.sofaBack} />
-        <View style={styles.imgOverlay} />
+
+        {/* Heart button top-right */}
         <TouchableOpacity
           style={styles.recFavBtn}
           onPress={() => setFav(v => !v)}
           activeOpacity={0.8}
         >
-          <Heart size={14} color="#fff" fill={fav ? '#fff' : 'none'} />
+          <Heart size={16} color={fav ? ORANGE_LIGHT : '#fff'} fill={fav ? ORANGE_LIGHT : 'none'} />
         </TouchableOpacity>
-        <Text style={styles.watermark}>dentini</Text>
-      </View>
 
-      {/* Card body */}
-      <View style={styles.recCardBody}>
-        <Text style={styles.recCardName} numberOfLines={1}>
-          {business.name || 'Business Name'}
-        </Text>
-        <View style={styles.recMeta}>
-          <View style={styles.recMetaItem}>
-            <Clock size={10} color="#ef4444" />
-            <Text style={styles.recMetaText}>
-              {business.businessData?.hours || 'Available on Weekdays'}
-            </Text>
+        {/* Card body overlaid on image */}
+        <View style={styles.recCardBody}>
+          <Text style={styles.recCardName} numberOfLines={1}>
+            {business.name || 'Santolan Dental Clinic'}
+          </Text>
+          <View style={styles.recMeta}>
+            <View style={styles.recMetaItem}>
+              <Clock size={11} color="#ef4444" />
+              <Text style={styles.recMetaText}>
+                {business.businessData?.hours || 'Available on Weekdays'}
+              </Text>
+            </View>
+            <View style={styles.recMetaItem}>
+              <MapPin size={11} color={ORANGE_LIGHT} />
+              <Text style={styles.recMetaText}>
+                {business.businessData?.address || business.businessData?.location || 'Santolan, Pasig'}
+              </Text>
+            </View>
           </View>
-          <View style={styles.recMetaItem}>
-            <MapPin size={10} color={ORANGE} />
-            <Text style={styles.recMetaText}>
-              {business.businessData?.address || business.businessData?.location || 'Santolan, Pasig'}
-            </Text>
+          <View style={styles.recCardFooter}>
+            <StarRow rating={4} />
+            <TouchableOpacity style={styles.bookBtn} onPress={onPress} activeOpacity={0.85}>
+              <Text style={styles.bookBtnText}>BOOK NOW</Text>
+            </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.recCardFooter}>
-          <StarRow rating={4} />
-          <TouchableOpacity style={styles.bookBtn} onPress={onPress} activeOpacity={0.85}>
-            <Text style={styles.bookBtnText}>BOOK NOW</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </ImageBackground>
     </TouchableOpacity>
   );
 }
@@ -115,10 +109,10 @@ function BizCard({ business, onPress }: { business: any; onPress: () => void }) 
       <View style={styles.bizCardTop}>
         <View style={{ flex: 1 }}>
           <Text style={styles.bizTag}>
-            {(business.templateCategory || 'BUSINESS').toUpperCase()}
+            {(business.templateCategory || 'DENTAL').toUpperCase()}
           </Text>
           <Text style={styles.bizName} numberOfLines={1}>
-            {business.name?.toUpperCase() || 'BUSINESS'}
+            {business.name?.toUpperCase() || 'KAYE DENTAL'}
           </Text>
           <Text style={styles.bizDesc} numberOfLines={1}>
             {business.businessData?.description || 'Professional services at your fingertips'}
@@ -150,7 +144,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeCategory, setActiveCategory] = useState('Dental');
   const [unreadCount, setUnreadCount] = useState(0);
 
   const loadData = useCallback(async () => {
@@ -160,7 +154,7 @@ export default function HomeScreen() {
       const res = await websiteAPI.getPublicWebsites();
       const all = res.websites || res.data || res || [];
       const shuffled = [...all].sort(() => 0.5 - Math.random());
-      setRecommended(shuffled.slice(0, 6));
+      setRecommended(shuffled.slice(0, 5));
       setBusinesses(all);
 
       try {
@@ -183,42 +177,50 @@ export default function HomeScreen() {
 
   const onRefresh = () => { setRefreshing(true); loadData(); };
 
-  const filtered = activeCategory === 'All'
-    ? businesses
-    : businesses.filter(b =>
-        b.templateCategory?.toLowerCase() === activeCategory.toLowerCase()
-      );
+  const filtered = businesses.filter(b =>
+    b.templateCategory?.toLowerCase() === activeCategory.toLowerCase()
+  );
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+    <View style={styles.screen}>
       <StatusBar barStyle="light-content" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ORANGE} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ORANGE_LIGHT} />
         }
       >
-        {/* ── GRADIENT HEADER ── */}
-        <LinearGradient
-          colors={['#5c1a00', '#a03600', '#d95000', '#ff6e00', '#2a0e00']}
-          locations={[0, 0.25, 0.50, 0.70, 1]}
-          start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-          style={[styles.header, { paddingTop: insets.top + 12 }]}
+        {/* ── HEADER with bg_org.png ── */}
+        <ImageBackground
+          source={require('../../assets/images/bg_org.png')}
+          style={[styles.header, { paddingTop: insets.top + 16 }]}
+          resizeMode="cover"
         >
-          {/* Top bar */}
+          {/* Dark gradient overlay so text is readable */}
+          <LinearGradient
+            colors={['rgba(30,10,0,0.55)', 'rgba(80,20,0,0.35)', 'rgba(20,6,0,0.7)']}
+            locations={[0, 0.5, 1]}
+            style={StyleSheet.absoluteFill}
+          />
+
+          {/* Top bar: logo | greeting | bell */}
           <View style={styles.topBar}>
             {/* S Logo */}
             <View style={styles.logoCircle}>
-              <SLogo />
+              <Image
+                source={require('../../assets/images/subsicon.png')}
+                style={styles.logoImg}
+                resizeMode="contain"
+              />
             </View>
 
             {/* Greeting */}
-            <View style={{ flex: 1 }}>
+            <View style={styles.greetWrap}>
               <Text style={styles.greetTop}>
                 Welcome to <Text style={styles.greetBrand}>SUBS,</Text>
               </Text>
-              <Text style={styles.greetName}>
+              <Text style={styles.greetName} numberOfLines={1}>
                 {session?.firstName} {session?.lastName}!
               </Text>
             </View>
@@ -237,7 +239,7 @@ export default function HomeScreen() {
           {/* Error banner */}
           {error ? (
             <View style={styles.errorBanner}>
-              <AlertCircle size={16} color="#ef4444" />
+              <AlertCircle size={15} color="#ef4444" />
               <Text style={styles.errorText}>{error}</Text>
               <TouchableOpacity onPress={onRefresh}>
                 <Text style={styles.retryText}>Retry</Text>
@@ -245,12 +247,12 @@ export default function HomeScreen() {
             </View>
           ) : null}
 
-          {/* Quick action cards */}
+          {/* Quick Action Cards */}
           <View style={styles.quickActions}>
             {[
-              { icon: <Compass size={22} color={ORANGE} />,  label: 'Explore',   route: '/(tabs)/explore'   },
-              { icon: <Calendar size={22} color={ORANGE} />, label: 'Bookings',  route: '/(tabs)/bookings'  },
-              { icon: <Bookmark size={22} color={ORANGE} />, label: 'Favorites', route: '/(tabs)/favorites' },
+              { icon: <Compass size={24} color={ORANGE} />,  label: 'Explore',   route: '/(tabs)/explore'   },
+              { icon: <Calendar size={24} color={ORANGE} />, label: 'Bookings',  route: '/(tabs)/bookings'  },
+              { icon: <Bookmark size={24} color={ORANGE} />, label: 'Favorites', route: '/(tabs)/favorites' },
             ].map(({ icon, label, route }) => (
               <TouchableOpacity
                 key={label}
@@ -258,23 +260,19 @@ export default function HomeScreen() {
                 onPress={() => router.push(route as any)}
                 activeOpacity={0.8}
               >
-                <View style={styles.actionIconBox}>{icon}</View>
+                <View style={styles.actionIconCircle}>{icon}</View>
                 <Text style={styles.actionLabel}>{label}</Text>
               </TouchableOpacity>
             ))}
           </View>
-        </LinearGradient>
+        </ImageBackground>
 
         {/* ── RECOMMENDED FOR YOU ── */}
-        <LinearGradient
-          colors={['#c84200', '#f5f5f5']}
-          locations={[0, 0.55]}
-          style={styles.recommendedSection}
-        >
+        <View style={styles.recommendedSection}>
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionTitleWhite}>Recommended For You</Text>
+            <Text style={styles.sectionTitleDark}>Recommended For You</Text>
             <TouchableOpacity onPress={() => router.push('/(tabs)/explore')}>
-              <Text style={styles.viewAllWhite}>View All</Text>
+              <Text style={styles.viewAllOrange}>View All</Text>
             </TouchableOpacity>
           </View>
 
@@ -286,28 +284,24 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.carouselContent}
               decelerationRate="fast"
-              snapToInterval={278}
+              snapToInterval={300}
             >
-              {/* Left peek ghost */}
-              <View style={[styles.recCard, styles.peekCard]}>
-                <LinearGradient colors={['#2a1000', '#1a0800']} style={{ flex: 1, borderRadius: 18 }} />
-              </View>
-
-              {recommended.map(biz => (
+              {recommended.length > 0 ? recommended.map(biz => (
                 <RecCard
                   key={biz._id}
                   business={biz}
                   onPress={() => router.push(`/business/${biz.slug}`)}
                 />
-              ))}
-
-              {/* Right peek ghost */}
-              <View style={[styles.recCard, styles.peekCard]}>
-                <LinearGradient colors={['#1a0800', '#2a1000']} style={{ flex: 1, borderRadius: 18 }} />
-              </View>
+              )) : (
+                /* Demo card when no data yet */
+                <RecCard
+                  business={{ name: 'Santolan Dental Clinic' }}
+                  onPress={() => {}}
+                />
+              )}
             </ScrollView>
           )}
-        </LinearGradient>
+        </View>
 
         {/* ── WHITE CONTENT ── */}
         <View style={styles.whiteContent}>
@@ -329,10 +323,9 @@ export default function HomeScreen() {
                     onPress={() => setActiveCategory(key)}
                     activeOpacity={0.8}
                   >
-                    <Icon
-                      size={15}
-                      color={isActive ? '#fff' : '#cc5500'}
-                    />
+                    <View style={[styles.catIconCircle, isActive && styles.catIconCircleActive]}>
+                      <Icon size={14} color={isActive ? '#fff' : ORANGE} />
+                    </View>
                     <Text style={[styles.catPillText, isActive && styles.catPillTextActive]}>
                       {label}
                     </Text>
@@ -362,9 +355,15 @@ export default function HomeScreen() {
                 />
               ))
             ) : (
-              <View style={styles.emptyBox}>
-                <Text style={styles.emptyText}>No businesses found</Text>
-              </View>
+              /* Demo card when no data */
+              <BizCard
+                business={{
+                  templateCategory: 'dental',
+                  name: 'Kaye Dental',
+                  businessData: { description: 'Professional services at your fingertips' },
+                }}
+                onPress={() => {}}
+              />
             )}
           </View>
         </View>
@@ -374,71 +373,78 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+
   /* ── Header ── */
   header: {
     paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingBottom: 28,
     overflow: 'hidden',
   },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginBottom: 20,
+    marginBottom: 22,
   },
   logoCircle: {
-    width: 44, height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0,0,0,0.28)',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.25)',
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,
   },
-  sLogo: {
-    width: 28, height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255,102,0,0.25)',
-    justifyContent: 'center',
-    alignItems: 'center',
+  logoImg: {
+    width: 28,
+    height: 28,
   },
-  sLogoText: {
-    color: ORANGE,
-    fontSize: 16,
-    fontFamily: 'Inter_700Bold',
+  greetWrap: {
+    flex: 1,
   },
   greetTop: {
-    color: 'rgba(255,255,255,0.82)',
+    color: 'rgba(255,255,255,0.85)',
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
     lineHeight: 16,
   },
   greetBrand: {
     color: '#fff',
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Inter_700Bold',
   },
   greetName: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Inter_700Bold',
-    marginTop: 1,
+    marginTop: 2,
   },
   bellBtn: {
-    width: 40, height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.24)',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,150,50,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,
-    position: 'relative',
   },
   bellDot: {
     position: 'absolute',
-    top: 6, right: 7,
-    width: 8, height: 8,
+    top: 7,
+    right: 8,
+    width: 8,
+    height: 8,
     borderRadius: 4,
     backgroundColor: '#ef4444',
     borderWidth: 1.5,
-    borderColor: '#c84200',
+    borderColor: '#6b1a00',
   },
   errorBanner: {
     flexDirection: 'row',
@@ -447,10 +453,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.15)',
     borderRadius: 10,
     padding: 10,
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  errorText: { flex: 1, color: '#fff', fontSize: 12, fontFamily: 'Inter_400Regular' },
-  retryText: { color: '#fff', fontSize: 12, fontFamily: 'Inter_600SemiBold', textDecorationLine: 'underline' },
+  errorText: {
+    flex: 1,
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+  },
+  retryText: {
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
+    textDecorationLine: 'underline',
+  },
 
   /* Quick actions */
   quickActions: {
@@ -460,34 +476,37 @@ const styles = StyleSheet.create({
   actionCard: {
     flex: 1,
     backgroundColor: '#fff',
-    borderRadius: 18,
-    paddingVertical: 16,
+    borderRadius: 20,
+    paddingVertical: 18,
     paddingHorizontal: 8,
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.14,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  actionIconBox: {
-    width: 44, height: 44,
-    borderRadius: 12,
-    backgroundColor: '#fff5f0',
+  actionIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#fff3ec',
     justifyContent: 'center',
     alignItems: 'center',
   },
   actionLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
     color: '#1a1a1a',
   },
 
   /* ── Recommended ── */
   recommendedSection: {
+    backgroundColor: '#fff',
     paddingTop: 20,
-    paddingBottom: 0,
+    paddingBottom: 6,
+    marginBottom: 8,
   },
   sectionRow: {
     flexDirection: 'row',
@@ -496,87 +515,47 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 14,
   },
-  sectionTitleWhite: {
-    fontSize: 16,
-    fontFamily: 'Inter_700Bold',
-    color: '#ffffff',
-  },
-  viewAllWhite: {
-    fontSize: 12,
+  viewAllOrange: {
+    fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
-    color: 'rgba(255,255,255,0.88)',
+    color: ORANGE,
   },
   carouselContent: {
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 16,
     gap: 14,
   },
   recCard: {
-    width: 262,
-    backgroundColor: '#111111',
+    width: 284,
     borderRadius: 18,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.28,
     shadowRadius: 16,
     elevation: 8,
   },
-  peekCard: {
-    width: 130,
-    opacity: 0.45,
-    height: 220,
-  },
   recCardImg: {
-    height: 155,
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  sofa: {
-    position: 'absolute',
-    bottom: 18, left: 18,
-    width: 120, height: 32,
-    backgroundColor: 'rgba(248,243,234,0.88)',
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-  },
-  sofaBack: {
-    position: 'absolute',
-    bottom: 32, left: 20,
-    width: 116, height: 20,
-    backgroundColor: 'rgba(252,248,240,0.82)',
-    borderTopLeftRadius: 6,
-    borderTopRightRadius: 6,
-  },
-  imgOverlay: {
-    position: 'absolute',
-    bottom: 0, left: 0, right: 0,
-    height: 40,
-    backgroundColor: 'transparent',
+    height: 220,
+    justifyContent: 'flex-end',
   },
   recFavBtn: {
     position: 'absolute',
-    top: 10, right: 10,
-    width: 30, height: 30,
-    borderRadius: 15,
-    backgroundColor: 'rgba(255,255,255,0.16)',
+    top: 12,
+    right: 12,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255,255,255,0.22)',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  watermark: {
-    position: 'absolute',
-    bottom: 8, right: 10,
-    fontSize: 10,
-    fontFamily: 'Inter_400Regular',
-    color: 'rgba(255,255,255,0.35)',
-    fontStyle: 'italic',
   },
   recCardBody: {
     padding: 14,
   },
   recCardName: {
     color: '#ffffff',
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: 'Inter_700Bold',
     marginBottom: 6,
   },
@@ -589,12 +568,12 @@ const styles = StyleSheet.create({
   recMetaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: 4,
   },
   recMetaText: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: 'Inter_400Regular',
-    color: '#a0a0a0',
+    color: 'rgba(255,255,255,0.82)',
   },
   recCardFooter: {
     flexDirection: 'row',
@@ -610,16 +589,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
     color: '#fff',
-    marginLeft: 3,
+    marginLeft: 4,
   },
   bookBtn: {
     backgroundColor: ORANGE,
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     paddingVertical: 9,
     borderRadius: 50,
     shadowColor: ORANGE,
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.45,
     shadowRadius: 6,
     elevation: 4,
   },
@@ -637,7 +616,7 @@ const styles = StyleSheet.create({
   categorySection: {
     backgroundColor: '#ffffff',
     paddingTop: 18,
-    paddingBottom: 14,
+    paddingBottom: 16,
     marginBottom: 8,
   },
   sectionTitleDark: {
@@ -654,19 +633,33 @@ const styles = StyleSheet.create({
   catPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 50,
     backgroundColor: '#fff0e8',
+    borderWidth: 1,
+    borderColor: 'rgba(230,81,0,0.15)',
   },
   catPillActive: {
     backgroundColor: ORANGE,
+    borderColor: ORANGE,
+  },
+  catIconCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: 'rgba(230,81,0,0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  catIconCircleActive: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
   },
   catPillText: {
     fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
-    color: '#cc5500',
+    color: ORANGE,
   },
   catPillTextActive: {
     color: '#ffffff',
@@ -676,22 +669,17 @@ const styles = StyleSheet.create({
   bizSection: {
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 24,
-  },
-  viewAllOrange: {
-    fontSize: 13,
-    fontFamily: 'Inter_600SemiBold',
-    color: ORANGE,
+    paddingBottom: 28,
   },
   bizCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 16,
+    padding: 16,
     marginBottom: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
     borderColor: '#f0f0f0',
@@ -705,13 +693,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
     color: ORANGE,
     letterSpacing: 1.2,
-    marginBottom: 3,
+    marginBottom: 4,
   },
   bizName: {
     fontSize: 15,
     fontFamily: 'Inter_700Bold',
     color: '#111111',
-    marginBottom: 3,
+    marginBottom: 4,
   },
   bizDesc: {
     fontSize: 12,
@@ -725,30 +713,17 @@ const styles = StyleSheet.create({
   bizCardFooter: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 12,
+    marginTop: 14,
   },
   viewDetailsBtn: {
     backgroundColor: ORANGE,
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 9,
+    borderRadius: 9,
   },
   viewDetailsBtnText: {
     color: '#ffffff',
     fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
-  },
-
-  emptyBox: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 32,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 14,
-    fontFamily: 'Inter_400Regular',
-    color: '#888',
-    textAlign: 'center',
   },
 });
