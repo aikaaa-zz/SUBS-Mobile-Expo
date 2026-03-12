@@ -108,7 +108,7 @@ export default function BookingsScreen() {
     }
     setActionLoading(true);
     try {
-      await bookingAPI.updateBooking(selectedBooking._id, { status: 'cancelled', cancellationReason: cancelReason });
+      await bookingAPI.updateBooking(selectedBooking._id, { status: 'cancelled', cancelledBy: 'customer', cancellationReason: cancelReason });
       const updated = bookings.map(b => b._id === selectedBooking._id ? { ...b, status: 'cancelled' } : b);
       setBookings(updated);
       await storage.setLocalBookings(updated);

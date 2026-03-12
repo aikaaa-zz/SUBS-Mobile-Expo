@@ -26,8 +26,8 @@ export default function NotificationsScreen() {
       const response = await notificationAPI.getUserNotifications(userId, filter === 'unread');
       setNotifications(response.notifications || []);
       setUnreadCount(response.unreadCount || 0);
-    } catch (error) {
-      console.error('Error loading notifications:', error);
+    } catch {
+      // Notifications endpoint not yet available — show empty state silently
     } finally {
       setLoading(false);
       setRefreshing(false);
