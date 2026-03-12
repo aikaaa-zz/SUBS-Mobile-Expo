@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  RefreshControl, StatusBar, ImageBackground, Image,
+  RefreshControl, StatusBar, ImageBackground, Image, useWindowDimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
@@ -16,8 +16,8 @@ import { websiteAPI } from '../../services/api';
 import { storage } from '../../utils/storage';
 import { useAuth } from '../../hooks/useAuth';
 
-const ORANGE = '#E65100';
-const ORANGE_LIGHT = '#ff6600';
+const ORANGE = '#FF5F1F';
+const ORANGE_LIGHT = '#FF5F1F';
 
 const CATEGORIES = [
   { key: 'Dental',  label: 'Dental',  Icon: Stethoscope },
@@ -46,57 +46,92 @@ function RecCard({ business, onPress }: { business: any; onPress: () => void }) 
   const [fav, setFav] = useState(false);
   const imageUri = business.businessData?.logo || business.businessData?.coverImage;
 
-  return (
-    <TouchableOpacity style={styles.recCard} onPress={onPress} activeOpacity={0.9}>
-      <ImageBackground
-        source={imageUri ? { uri: imageUri } : require('../../assets/images/bg_org.png')}
-        style={styles.recCardImg}
-        imageStyle={{ borderRadius: 18 }}
-        resizeMode="cover"
+  const cardOverlay = (
+    <>
+      {/* Dark gradient overlay — bottom half */}
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.82)']}
+        locations={[0.35, 1]}
+        style={StyleSheet.absoluteFill}
+      />
+
+      {/* Heart button — orange circle */}
+      <TouchableOpacity
+        style={styles.recFavBtn}
+        onPress={() => setFav(v => !v)}
+        activeOpacity={0.8}
       >
-        {/* Dark gradient overlay at bottom */}
-        <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.75)']}
-          locations={[0.3, 1]}
-          style={StyleSheet.absoluteFill}
-        />
+        <Heart size={16} color="#fff" fill={fav ? '#fff' : 'none'} />
+      </TouchableOpacity>
 
-        {/* Heart button top-right */}
-        <TouchableOpacity
-          style={styles.recFavBtn}
-          onPress={() => setFav(v => !v)}
-          activeOpacity={0.8}
-        >
-          <Heart size={16} color={fav ? ORANGE_LIGHT : '#fff'} fill={fav ? ORANGE_LIGHT : 'none'} />
-        </TouchableOpacity>
-
-        {/* Card body overlaid on image */}
-        <View style={styles.recCardBody}>
-          <Text style={styles.recCardName} numberOfLines={1}>
-            {business.name || 'Santolan Dental Clinic'}
-          </Text>
-          <View style={styles.recMeta}>
-            <View style={styles.recMetaItem}>
-              <Clock size={11} color="#ef4444" />
-              <Text style={styles.recMetaText}>
-                {business.businessData?.hours || 'Available on Weekdays'}
-              </Text>
-            </View>
-            <View style={styles.recMetaItem}>
-              <MapPin size={11} color={ORANGE_LIGHT} />
-              <Text style={styles.recMetaText}>
-                {business.businessData?.address || business.businessData?.location || 'Santolan, Pasig'}
-              </Text>
-            </View>
+      {/* Card body overlaid on image */}
+      <View style={styles.recCardBody}>
+        <Text style={styles.recCardName} numberOfLines={1}>
+          {business.name || 'Santolan Dental Clinic'}
+        </Text>
+        <View style={styles.recMeta}>
+          <View style={styles.recMetaItem}>
+            <Clock size={11} color="#ef4444" />
+            <Text style={styles.recMetaText}>
+              {business.businessData?.hours || 'Available on Weekdays'}
+            </Text>
           </View>
-          <View style={styles.recCardFooter}>
-            <StarRow rating={4} />
-            <TouchableOpacity style={styles.bookBtn} onPress={onPress} activeOpacity={0.85}>
-              <Text style={styles.bookBtnText}>BOOK NOW</Text>
-            </TouchableOpacity>
+          <View style={styles.recMetaItem}>
+            <MapPin size={11} color={ORANGE_LIGHT} />
+            <Text style={styles.recMetaText}>
+              {business.businessData?.address || business.businessData?.location || 'Santolan, Pasig'}
+            </Text>
           </View>
         </View>
-      </ImageBackground>
+        <View style={styles.recCardFooter}>
+          <StarRow rating={4} />
+          <TouchableOpacity style={styles.bookBtn} onPress={onPress} activeOpacity={0.85}>
+            <Text style={styles.bookBtnText}>BOOK NOW</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </>
+  );
+
+  if (imageUri) {
+    return (
+      <TouchableOpacity style={styles.recCard} onPress={onPress} activeOpacity={0.9}>
+        <ImageBackground
+          source={{ uri: imageUri }}
+          style={styles.recCardImg}
+          imageStyle={{ borderRadius: 18 }}
+          resizeMode="cover"
+        >
+          {cardOverlay}
+        </ImageBackground>
+      </TouchableOpacity>
+    );
+  }
+
+  /* ── Fallback: dental clinic simulation ── */
+  return (
+    <TouchableOpacity style={styles.recCard} onPress={onPress} activeOpacity={0.9}>
+      <View style={styles.recCardImg}>
+        {/* Warm beige base */}
+        <LinearGradient
+          colors={['#ddd4c8', '#c8bdb0', '#b8aba0']}
+          start={{ x: 0.2, y: 0 }} end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        {/* Arch / curved wall element */}
+        <View style={styles.archDecor} />
+        {/* Ambient light spot */}
+        <View style={styles.lightSpot} />
+        {/* Counter/shelf */}
+        <View style={styles.shelf} />
+        {/* Sofa back */}
+        <View style={styles.sofaBack} />
+        {/* Sofa seat */}
+        <View style={styles.sofa} />
+        {/* Brand watermark */}
+        <Text style={styles.watermark}>dentini</Text>
+        {cardOverlay}
+      </View>
     </TouchableOpacity>
   );
 }
@@ -138,6 +173,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const { session } = useAuth();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
+  const cardWidth = Math.min(screenWidth * 0.76, 300);
 
   const [businesses, setBusinesses] = useState<any[]>([]);
   const [recommended, setRecommended] = useState<any[]>([]);
@@ -197,10 +234,20 @@ export default function HomeScreen() {
           style={[styles.header, { paddingTop: insets.top + 16 }]}
           resizeMode="cover"
         >
-          {/* Dark gradient overlay so text is readable */}
+          {/* Left-to-right overlay: dark left (text legible) → transparent right (orange shows) */}
           <LinearGradient
-            colors={['rgba(30,10,0,0.55)', 'rgba(80,20,0,0.35)', 'rgba(20,6,0,0.7)']}
-            locations={[0, 0.5, 1]}
+            colors={['rgba(10,3,0,0.78)', 'rgba(20,6,0,0.42)', 'rgba(0,0,0,0.0)']}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={StyleSheet.absoluteFill}
+          />
+          {/* Bottom fade so cards transition cleanly */}
+          <LinearGradient
+            colors={['transparent', 'rgba(8,2,0,0.55)']}
+            locations={[0.5, 1]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
             style={StyleSheet.absoluteFill}
           />
 
@@ -284,7 +331,8 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.carouselContent}
               decelerationRate="fast"
-              snapToInterval={300}
+              snapToInterval={cardWidth + 14}
+              snapToAlignment="start"
             >
               {recommended.length > 0 ? recommended.map(biz => (
                 <RecCard
@@ -293,7 +341,6 @@ export default function HomeScreen() {
                   onPress={() => router.push(`/business/${biz.slug}`)}
                 />
               )) : (
-                /* Demo card when no data yet */
                 <RecCard
                   business={{ name: 'Santolan Dental Clinic' }}
                   onPress={() => {}}
@@ -381,7 +428,7 @@ const styles = StyleSheet.create({
   /* ── Header ── */
   header: {
     paddingHorizontal: 20,
-    paddingBottom: 28,
+    paddingBottom: 32,
     overflow: 'hidden',
   },
   topBar: {
@@ -504,7 +551,7 @@ const styles = StyleSheet.create({
   /* ── Recommended ── */
   recommendedSection: {
     backgroundColor: '#fff',
-    paddingTop: 20,
+    paddingTop: 18,
     paddingBottom: 6,
     marginBottom: 8,
   },
@@ -538,6 +585,8 @@ const styles = StyleSheet.create({
   recCardImg: {
     height: 220,
     justifyContent: 'flex-end',
+    borderRadius: 18,
+    overflow: 'hidden',
   },
   recFavBtn: {
     position: 'absolute',
@@ -546,9 +595,71 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: 'rgba(255,255,255,0.22)',
+    backgroundColor: ORANGE,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: ORANGE,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  /* Dental clinic interior decor */
+  archDecor: {
+    position: 'absolute',
+    top: -60,
+    left: -40,
+    width: 180,
+    height: 200,
+    borderRadius: 90,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+  },
+  lightSpot: {
+    position: 'absolute',
+    top: 10,
+    right: 30,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255,248,235,0.28)',
+  },
+  shelf: {
+    position: 'absolute',
+    bottom: 64,
+    right: 0,
+    width: 100,
+    height: 10,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    borderTopLeftRadius: 4,
+  },
+  sofaBack: {
+    position: 'absolute',
+    bottom: 32,
+    left: 16,
+    width: 130,
+    height: 22,
+    backgroundColor: 'rgba(245,240,232,0.85)',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+  },
+  sofa: {
+    position: 'absolute',
+    bottom: 18,
+    left: 14,
+    width: 134,
+    height: 20,
+    backgroundColor: 'rgba(252,248,242,0.9)',
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+  },
+  watermark: {
+    position: 'absolute',
+    bottom: 72,
+    right: 12,
+    fontSize: 11,
+    fontFamily: 'Inter_400Regular',
+    color: 'rgba(100,80,60,0.4)',
+    fontStyle: 'italic',
   },
   recCardBody: {
     padding: 14,

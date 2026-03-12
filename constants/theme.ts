@@ -1,7 +1,7 @@
 export const Colors = {
-  primaryOrange: '#ff6600',
-  secondaryOrange: '#f34b1d',
-  darkOrange: '#e55a00',
+  primaryOrange: '#FF5F1F',
+  secondaryOrange: '#E65100',
+  darkOrange: '#cc4400',
   lightOrangeBg: '#fff5f0',
   lightOrangeBorder: '#fed7aa',
 
