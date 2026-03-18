@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Bell, RefreshCw, Menu } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { notificationAPI } from '../services/api';
 import { storage } from '../utils/storage';
@@ -50,10 +51,18 @@ const Header: React.FC<HeaderProps> = ({ title, showBack = false, onMenuClick, o
   };
 
   return (
-    <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+    <LinearGradient
+      colors={['#2a0800', '#7a2200', '#CC4400', '#FF5F1F']}
+      locations={[0, 0.3, 0.65, 1]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[styles.header, { paddingTop: insets.top + 8 }]}
+    >
       {showBack ? (
         <TouchableOpacity style={styles.headerButton} onPress={() => router.back()}>
-          <ArrowLeft size={24} color={Colors.textDark} />
+          <View style={styles.circleBtn}>
+            <ArrowLeft size={20} color="#fff" />
+          </View>
         </TouchableOpacity>
       ) : (
         <View style={styles.logoContainer}>
@@ -74,7 +83,9 @@ const Header: React.FC<HeaderProps> = ({ title, showBack = false, onMenuClick, o
             onPress={handleRefresh}
             disabled={isRefreshing}
           >
-            <RefreshCw size={22} color={isRefreshing ? Colors.textMuted : Colors.textDark} />
+            <View style={styles.circleBtn}>
+              <RefreshCw size={18} color={isRefreshing ? 'rgba(255,255,255,0.5)' : '#fff'} />
+            </View>
           </TouchableOpacity>
         )}
 
@@ -82,23 +93,27 @@ const Header: React.FC<HeaderProps> = ({ title, showBack = false, onMenuClick, o
           style={styles.headerButton}
           onPress={() => router.push('/notifications')}
         >
-          <Bell size={24} color={Colors.textDark} />
-          {unreadCount > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </Text>
-            </View>
-          )}
+          <View style={styles.circleBtn}>
+            <Bell size={20} color="#fff" />
+            {unreadCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+              </View>
+            )}
+          </View>
         </TouchableOpacity>
 
         {onMenuClick && (
           <TouchableOpacity style={styles.headerButton} onPress={onMenuClick}>
-            <Menu size={24} color={Colors.textDark} />
+            <View style={styles.circleBtn}>
+              <Menu size={20} color="#fff" />
+            </View>
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </LinearGradient>
   );
 };
 
@@ -107,57 +122,61 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: Colors.bgWhite,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderColor,
+    paddingBottom: 14,
     zIndex: 999,
   },
   headerButton: {
-    width: 40,
-    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
+  },
+  circleBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(0,0,0,0.28)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logoContainer: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(0,0,0,0.28)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   logo: {
-    width: 32,
-    height: 32,
-    borderRadius: 6,
+    width: 24,
+    height: 24,
   },
   title: {
     flex: 1,
     fontSize: FontSize.xl,
-    fontFamily: 'Inter_600SemiBold',
-    color: Colors.textDark,
+    fontFamily: 'Inter_700Bold',
+    color: '#ffffff',
     textAlign: 'center',
     marginHorizontal: 8,
   },
   rightActions: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
   badge: {
     position: 'absolute',
-    top: 2,
-    right: 2,
+    top: 4,
+    right: 4,
     backgroundColor: Colors.errorRed,
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 3,
   },
   badgeText: {
     color: Colors.white,
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: 'Inter_700Bold',
   },
 });
