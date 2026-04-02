@@ -188,7 +188,7 @@ export default function HomeScreen() {
     if (!session?.userId) return;
     try {
       setError('');
-      const res = await websiteAPI.getPublicWebsites();
+      const res = await websiteAPI.getPublicWebsites({limit: 20});
       const all = res.websites || res.data || res || [];
       const shuffled = [...all].sort(() => 0.5 - Math.random());
       setRecommended(shuffled.slice(0, 5));

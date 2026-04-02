@@ -31,18 +31,28 @@ export default function ExploreScreen() {
   const [favorites, setFavorites] = useState<any[]>([]);
 
   const loadBusinesses = useCallback(async () => {
-    try {
-      setError('');
-      const response = await websiteAPI.getPublicWebsites();
-      const websites = response.websites || response.data || response || [];
-      setBusinesses(websites);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load businesses.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+  try {
+    setError('');
+    setLoading(true);
+    const params = selectedCategory !== 'All'
+      ? { limit: 20, category: selectedCategory.toLowerCase() }
+      : { limit: 20 };
+    const response = await websiteAPI.getPublicWebsites(params);
+    const websites = response.websites || response.data || response || [];
+    setBusinesses(websites);
+    setFilteredBusinesses(websites);
+  } catch (err: any) {
+    setError(err.message || 'Failed to load businesses.');
+  } finally {
+    setLoading(false);
+    setRefreshing(false);
+  }
+}, [selectedCategory]);
+
+useEffect(() => { 
+  loadBusinesses(); 
+  loadFavorites(); 
+}, [loadBusinesses]);
 
   const loadFavorites = useCallback(async () => {
     const favs = await storage.getFavorites();
@@ -335,20 +345,24 @@ const styles = StyleSheet.create({
   },
 
   /* Categories */
-  categoryScroll: {
-    paddingHorizontal: 20,
-    gap: 8,
-    paddingBottom: 4,
-    marginBottom: 4,
+categoryScroll: {
+  paddingHorizontal: 20,
+  gap: 8,
+  paddingBottom: 12,
+  marginBottom: 4,
+  alignItems: 'center',
   },
   catPill: {
-    paddingHorizontal: 16,
-    paddingVertical: 7,
-    borderRadius: 50,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fff',
-  },
+  paddingHorizontal: 16,
+  paddingVertical: 7,
+  borderRadius: 50,
+  borderWidth: 1,
+  borderColor: '#ddd',
+  backgroundColor: '#fff',
+  height: 36,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
   catPillActive: {
     backgroundColor: ORANGE,
     borderColor: ORANGE,

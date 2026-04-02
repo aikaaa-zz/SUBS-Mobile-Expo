@@ -1,7 +1,7 @@
 import { API_BASE_URL } from '../constants/api';
 import { storage } from '../utils/storage';
 
-const REQUEST_TIMEOUT = 15000;
+const REQUEST_TIMEOUT = 30000;
 
 const getAuthToken = async (): Promise<string | null> => {
   return storage.getToken();
@@ -29,7 +29,7 @@ const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 3)
   let lastError: Error | undefined;
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const response = await fetchWithTimeout(url, options);
+      const response = await fetchWithTimeout(url, options, REQUEST_TIMEOUT);
       if (response.status >= 500 && i < maxRetries - 1) {
         lastError = new Error(`Server error: ${response.status}`);
         await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
@@ -56,7 +56,7 @@ const parseResponseBody = async (response: Response) => {
   }
 };
 
-const authFetch = async (endpoint: string, options: RequestInit = {}) => {
+const authFetch = async (endpoint: string, options: RequestInit = {}, timeout = REQUEST_TIMEOUT) => {
   const token = await getAuthToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -71,9 +71,9 @@ const authFetch = async (endpoint: string, options: RequestInit = {}) => {
 
   try {
     const response = await fetchWithRetry(url, {
-      ...options,
-      headers,
-    });
+    ...options,
+    headers,
+  }, timeout);
 
     const body = await parseResponseBody(response);
 
@@ -149,10 +149,18 @@ export const userAPI = {
 };
 
 // Website API
+// Website API
 export const websiteAPI = {
-  getPublicWebsites: async () => {
-    return await authFetch('/public/websites');
-  },
+ getPublicWebsites: async (params?: { limit?: number; category?: string; offset?: number }) => {
+  const query = params
+    ? '?' + new URLSearchParams(
+        Object.entries(params)
+          .filter(([_, v]) => v !== undefined)
+          .map(([k, v]) => [k, String(v)])
+      ).toString()
+    : '';
+  return await authFetch(`/public/websites${query}`, {}, 45000);
+},
 
   getWebsiteBySlug: async (slug: string) => {
     return await authFetch(`/public/websites/${slug}`);
