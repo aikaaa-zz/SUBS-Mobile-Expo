@@ -4,7 +4,7 @@ import {
   ScrollView, RefreshControl, ActivityIndicator, Alert, Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Calendar, Clock, Phone, FileText, X, Edit, AlertTriangle } from 'lucide-react-native';
+import { Calendar, Clock, Phone, FileText, X, Edit, AlertTriangle, Star } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Header from '../../components/Header';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -209,7 +209,23 @@ export default function BookingsScreen() {
             </TouchableOpacity>
           </View>
         )}
-      </View>
+      {item.status === 'completed' && (
+  <TouchableOpacity
+    style={styles.feedbackBtn}
+    onPress={() => router.push({
+      pathname: '/leave-feedback',
+      params: {
+        websiteId: item.websiteId,
+        websiteName: item.businessName,
+        bookingId: item._id,
+      }
+    })}
+  >
+    <Star size={16} color={Colors.primaryOrange} />
+    <Text style={styles.feedbackBtnText}>Leave Feedback</Text>
+  </TouchableOpacity>
+)}
+</View>
     );
   };
 
@@ -420,5 +436,6 @@ const styles = StyleSheet.create({
   confirmCancelBtn: { flex: 1, flexDirection: 'row', paddingVertical: 12, borderRadius: BorderRadius.md, backgroundColor: Colors.errorRed, alignItems: 'center', justifyContent: 'center', gap: 6 },
   confirmCancelBtnText: { color: Colors.white, fontFamily: 'Inter_600SemiBold', fontSize: FontSize.md },
   saveBtn: { flex: 1, flexDirection: 'row', paddingVertical: 12, borderRadius: BorderRadius.md, backgroundColor: Colors.primaryOrange, alignItems: 'center', justifyContent: 'center', gap: 6 },
-  saveBtnText: { color: Colors.white, fontFamily: 'Inter_600SemiBold', fontSize: FontSize.md },
+  saveBtnText: { color: Colors.white, fontFamily: 'Inter_600SemiBold', fontSize: FontSize.md }, feedbackBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: BorderRadius.md, borderWidth: 1, borderColor: Colors.primaryOrange, marginTop: 8 },
+feedbackBtnText: { color: Colors.primaryOrange, fontFamily: 'Inter_600SemiBold', fontSize: FontSize.md },
 });

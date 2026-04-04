@@ -25,21 +25,21 @@ const fetchWithTimeout = (url: string, options: RequestInit, timeout = REQUEST_T
     });
 };
 
-const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 3): Promise<Response> => {
+const fetchWithRetry = async (url: string, options: RequestInit, timeout = REQUEST_TIMEOUT, maxRetries = 2): Promise<Response> => {
   let lastError: Error | undefined;
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const response = await fetchWithTimeout(url, options, REQUEST_TIMEOUT);
+      const response = await fetchWithTimeout(url, options, timeout);
       if (response.status >= 500 && i < maxRetries - 1) {
         lastError = new Error(`Server error: ${response.status}`);
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         continue;
       }
       return response;
     } catch (error: any) {
       lastError = error;
       if (i < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
   }
@@ -71,9 +71,9 @@ const authFetch = async (endpoint: string, options: RequestInit = {}, timeout = 
 
   try {
     const response = await fetchWithRetry(url, {
-    ...options,
-    headers,
-  }, timeout);
+  ...options,
+  headers,
+}, timeout);
 
     const body = await parseResponseBody(response);
 

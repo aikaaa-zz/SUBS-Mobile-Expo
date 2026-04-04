@@ -23,38 +23,46 @@ export default function MFAVerifyScreen() {
   const inputRef = useRef<TextInput>(null);
 
   const handleVerify = async () => {
-    const trimmed = code.trim();
-    if (!trimmed) {
-      setError('Please enter the verification code.');
-      return;
-    }
-    if (!isBackupMode && trimmed.length !== 6) {
-      setError('Authenticator code must be 6 digits.');
-      return;
-    }
+  const trimmed = code.trim();
+  if (!trimmed) {
+    setError('Please enter the verification code.');
+    return;
+  }
+  if (!isBackupMode && trimmed.length !== 6) {
+    setError('Authenticator code must be 6 digits.');
+    return;
+  }
 
-    setError('');
-    setLoading(true);
+  setError('');
+  setLoading(true);
 
-    try {
-      const response = await mfaAPI.verify(email, trimmed, isBackupMode);
+  try {
+    const response = await mfaAPI.verify(email, trimmed, isBackupMode);
 
-      if (response.token && response.user) {
-        const success = await login(response.user, response.token);
-        if (success) {
-          router.replace('/(tabs)/home');
-        } else {
-          setError('This mobile app is for personal accounts only.');
-        }
-      } else {
-        setError('Verification failed. Please try again.');
+    if (response.token && response.user) {
+      if (response.user.accountType !== 'personal') {
+        setError('This mobile app is for personal accounts only.');
+        setLoading(false);
+        return;
       }
-    } catch (err: any) {
-      setError(err.message || 'Invalid code. Please try again.');
-    } finally {
-      setLoading(false);
+      const success = await login(response.user, response.token);
+      if (success) {
+        router.replace('/(tabs)/home');
+      } else {
+        setError('This mobile app is for personal accounts only.');
+      }
+    } else {
+      setError('Verification failed. Please try again.');
     }
-  };
+  } catch (err: any) {
+    // Just show error, don't crash
+    setError(err.message || 'Invalid code. Please try again.');
+    setCode(''); // Clear the code so user can try again
+    setTimeout(() => inputRef.current?.focus(), 100); // Refocus input
+  } finally {
+    setLoading(false);
+  }
+};
 
   const toggleMode = () => {
     setIsBackupMode((prev) => !prev);
